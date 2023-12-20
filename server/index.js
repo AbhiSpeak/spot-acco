@@ -5,13 +5,14 @@ require('dotenv').config()
 const User = require('./models/User.js')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-
+const cookieParser = require('cookie-parser')
 
 const bcryptSalt = bcrypt.genSaltSync(10);
 const jwtSecret = 'suadhaisiasuh7asdhasudhasi73'
 
 const app = express()
 app.use(express.json())
+app.use(cookieParser())
 app.use(cors({
     credentials: true,
     origin: 'http://localhost:5173',
@@ -47,7 +48,9 @@ app.post('/login', async (req, res) => {
         if(user) {
             const checkPass = bcrypt.compareSync(password, user.password)
             if(checkPass) {
-                jwt.sign({email: user.email, id: user._id}, jwtSecret, {}, (err, token) => {
+                jwt.sign({email: user.email, 
+                        id: user._id}
+                        , jwtSecret, {}, (err, token) => {
                     if(err)
                         throw err
                     res.cookie('token', token).json(user)
@@ -55,13 +58,27 @@ app.post('/login', async (req, res) => {
             }else
                 res.status(422).json('pass not ok')
         } else {
-            res.json('no user')
+            res.status(422).json('no user')
         }
     } catch(e) {
         res.json('nah')
     }
 })
 
+app.get('/profile', (req, res) => {
+    const {token} = req.cookies;
+    if(token) {
+        jwt.verify(token, jwtSecret, {}, async(err, user) => {
+            if(err)
+                throw err;
+            const {name, email, _id} = await User.findById(user.id)
+
+            res.json({name, email, _id});
+        })
+    }else {
+        res.json(null);
+    }
+})
 app.listen(4040);
 
 //mongo user and pass: spotaco
