@@ -2,6 +2,8 @@ import { useContext, useState } from "react"
 import { UserContext } from "../UserContext"
 import { Link, Navigate, useParams } from "react-router-dom";
 import axios from "axios";
+import PlacesPage from "./PlacesPage";
+import AccountNav from "../components/AccountNav";
 function AccountPage () {
     const {user, ready, setUser} = useContext(UserContext);
     const [redirect, setRedirect] = useState(null)
@@ -26,30 +28,22 @@ function AccountPage () {
     }
     
     
-
-    function activeClass (type=null) {
-        let classes = 'py-2 px-6';
-        if(type === subpage) {
-            classes += ' bg-primary text-white rounded-full'
-        }
-        return classes;
-    }
     if(redirect) {
         return <Navigate to={redirect} />
     }
     return (
         <div>
-            <nav className="w-full flex gap-2 justify-center mt-4 mb-8">
-                <Link className ={activeClass('profile')} to={'/account'}>My Profile</Link>
-                <Link className ={activeClass('bookings')} to={'/account/bookings'}>My Bookings</Link>
-                <Link className ={activeClass('places')} to={'/account/places'}>My Accommodations</Link>
-            </nav>
+            <AccountNav />
             {subpage === 'profile' && (
                 <div className="text-center max-w-lg mx-auto">
                     Logged in as {user.name} ({user.email})<br />
-                    <button onClick={logout} className="primary max-w-sm -mt-2">Logout</button>
+                    <button onClick={logout} className="loginBtn max-w-sm mt-2">Logout</button>
                 </div>
             )}
+            {subpage === 'places' && (
+                <PlacesPage />
+            )}
+            
         </div>
     )
 }
