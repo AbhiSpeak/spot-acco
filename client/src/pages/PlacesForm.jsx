@@ -1,11 +1,12 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import Perks from "../components/Perks";
 import axios from "axios";
-import { Navigate } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import Photos from "../components/Photos";
 import AccountNav from "../components/AccountNav";
 
 function PlacesForm () {
+    const {id} = useParams()
     const [title, setTitle] = useState('')
     const [address, setAddress] = useState('')
     const [addedPhotos, setAddedPhotos] = useState([])
@@ -17,13 +18,36 @@ function PlacesForm () {
     const [maxGuest, setMaxGuest] = useState('')
     const [redirect, setRedirect] = useState(false)
 
-    async function addNewPlace (e) {
+    useEffect(() => {
+        if(!id)
+            return
+        else {
+            axios.get('/places/'+id).then(response => {
+                const {data} = response;
+                setTitle(data.title)
+                setAddress(data.address)
+                setAddedPhotos(data.addedPhotos)
+                setDescription(data.description)
+                setPerks(data.perks)
+                setExtraInfo(data.extraInfo)
+                setCheckIn(data.checkIn)
+                setCheckOut(data.checkOut)
+                setMaxGuest(data.maxGuest)
+            
+            })
+        }
+    },[id])
+    async function savePlace (e) {
         e.preventDefault();
-        console.log({addedPhotos})
         const data = {title, address, addedPhotos, 
-                        description, perks, extraInfo, 
-                        checkIn, checkOut, maxGuest}
-        await axios.post('/places', data)
+            description, perks, extraInfo, 
+            checkIn, checkOut, maxGuest}
+        if(id) {
+            await axios.put('/places', {id, ...data})
+        }
+        else {
+            await axios.post('/places', data)
+        }
         setRedirect(true)
     }
     if(redirect)
@@ -33,7 +57,7 @@ function PlacesForm () {
     return (
         <div>
             <AccountNav />
-                    <form onSubmit={addNewPlace}>
+                    <form onSubmit={savePlace}>
                         <h2 className="text-2xl mt-4">Title</h2>
                         <p className="text-gray-500 text-sm">Give the title for your place.</p>
                         <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="title" />
