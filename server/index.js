@@ -146,6 +146,43 @@ app.post('/places', (req, res) => {
     })
 })
 
+app.get('/places', (req, res) => {
+    const {token} = req.cookies
+    jwt.verify(token, jwtSecret, {}, async(err, user) => {
+        const owner = user.id
+        res.json(await Place.find({owner}))
+    })
+})
+
+app.get('/places/:id', async(req, res) => {
+    const {id} = req.params
+    res.json(await Place.findById(id))
+})
+
+app.put('/places', async(req, res) => {
+    const {token} = req.cookies
+    const
+    {id, title, address, addedPhotos, 
+    description, perks, extraInfo, 
+    checkIn, checkOut, maxGuests} = req.body
+
+    jwt.verify(token, jwtSecret, {}, async(err, user) => {
+        if(err)
+            throw err
+        const place = await Place.findById(id)
+        if(user.id === place.owner.toString()) {
+            place.set({
+            title, address, addedPhotos, 
+            description, perks, extraInfo, 
+            checkIn, checkOut, maxGuests
+            })
+            await place.save()
+            res.json('ok')
+        }
+    })
+
+})
+
 app.listen(4040);
 
 //mongo user and pass: spotaco
