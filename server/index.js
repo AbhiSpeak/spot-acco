@@ -132,7 +132,7 @@ app.post('/places', (req, res) => {
     const
     {title, address, addedPhotos, 
     description, perks, extraInfo, 
-    checkIn, checkOut, maxGuests} = req.body
+    checkIn, checkOut, maxGuests, price} = req.body
     jwt.verify(token, jwtSecret, {}, async(err, user) => {
         if(err)
             throw err;
@@ -140,7 +140,7 @@ app.post('/places', (req, res) => {
             owner: user.id,
             title, address, addedPhotos, 
             description, perks, extraInfo, 
-            checkIn, checkOut, maxGuests
+            checkIn, checkOut, maxGuests, price
         })
         res.json('done')
     })
@@ -164,7 +164,7 @@ app.put('/places', async(req, res) => {
     const
     {id, title, address, addedPhotos, 
     description, perks, extraInfo, 
-    checkIn, checkOut, maxGuests} = req.body
+    checkIn, checkOut, maxGuests, price} = req.body
 
     jwt.verify(token, jwtSecret, {}, async(err, user) => {
         if(err)
@@ -174,7 +174,7 @@ app.put('/places', async(req, res) => {
             place.set({
             title, address, addedPhotos, 
             description, perks, extraInfo, 
-            checkIn, checkOut, maxGuests
+            checkIn, checkOut, maxGuests, price,
             })
             await place.save()
             res.json('ok')
@@ -183,6 +183,10 @@ app.put('/places', async(req, res) => {
 
 })
 
+
+app.get('/allplaces', async (req, res) => {
+    res.json(await Place.find())
+})
 app.listen(4040);
 
 //mongo user and pass: spotaco
