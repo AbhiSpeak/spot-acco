@@ -16,6 +16,7 @@ const multer = require('multer')
 
 const fs = require('fs')
 const BookedModel = require('./models/Booked.js')
+const { resolve } = require('path')
 
 
 
@@ -35,6 +36,17 @@ app.use(cors({
 
 mongoose.connect(process.env.MONGO_URL)
 
+
+function getUserData(req) {
+    return new Promise((resolve, reject) => {
+        jwt.verify(req.cookies.token, jwtSecret, {}, async(err, user) => {
+            if(err)
+                throw err
+            resolve(user)
+        })
+    })
+    
+}
 
 app.get('/test', (req, res) => {
     res.json('test ok')
@@ -190,6 +202,7 @@ app.get('/allplaces', async (req, res) => {
 })
 
 app.post('/booking', async(req, res) => {
+    const userData = await getUserData(req)
     const {place, checkIn, 
             checkOut, maxGuests, 
                 name, mobile, price} = req.body
@@ -197,13 +210,19 @@ app.post('/booking', async(req, res) => {
     BookedModel.create({
         place, checkIn, 
             checkOut, maxGuests, 
-                name, mobile, price
+                name, mobile, price, user:userData.id
     }).then((doc) => {
         res.json(doc)
     }).catch((err) => {
         throw err
     })
 
+})
+
+app.get('/booking', async(req, res) => {
+    const userData = await getUserData(req)
+    res.json(await BookedModel.find({user:userData.id}).populate('place'))
+    console.log(res)
 })
 
 app.listen(4040);
