@@ -15,6 +15,7 @@ const imageDownloader = require('image-downloader')
 const multer = require('multer')
 
 const fs = require('fs')
+const BookedModel = require('./models/Booked.js')
 
 
 
@@ -187,6 +188,24 @@ app.put('/places', async(req, res) => {
 app.get('/allplaces', async (req, res) => {
     res.json(await Place.find())
 })
+
+app.post('/booking', async(req, res) => {
+    const {place, checkIn, 
+            checkOut, maxGuests, 
+                name, mobile, price} = req.body
+
+    BookedModel.create({
+        place, checkIn, 
+            checkOut, maxGuests, 
+                name, mobile, price
+    }).then((doc) => {
+        res.json(doc)
+    }).catch((err) => {
+        throw err
+    })
+
+})
+
 app.listen(4040);
 
 //mongo user and pass: spotaco
