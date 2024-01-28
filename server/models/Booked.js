@@ -3,6 +3,11 @@ const mongoose = require('mongoose')
 const bookedSchema = new mongoose.Schema({
     place: {
         type:mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'Place'
+    },
+    user: {
+        type:mongoose.Schema.Types.ObjectId,
         required: true
     },
     checkIn: {
